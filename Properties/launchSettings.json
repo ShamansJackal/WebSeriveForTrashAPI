@@ -16,7 +16,9 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "JwtIssuer": "Test.com",
-        "JwtKey": "ThisismySecretKey"
+        "JwtKey": "ThisismySecretKey",
+        "AdminLogin": "Admin",
+        "AdminPassword": "Password"
       },
       "applicationUrl": "https://localhost:7064;http://localhost:5064",
       "dotnetRunMessages": true

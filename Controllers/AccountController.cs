@@ -40,7 +40,7 @@ namespace WebSeriveForTrashAPI.Controllers
 
         private ClaimsIdentity GetIdentity(string username, string password)
         {
-            Person person = new("login", "Pass");
+            Person person = new(Environment.GetEnvironmentVariable("AdminLogin"), Environment.GetEnvironmentVariable("AdminPassword"));
             if (person != null)
             {
                 var claims = new List<Claim>

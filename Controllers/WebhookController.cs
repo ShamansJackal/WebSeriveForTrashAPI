@@ -3,12 +3,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace WebSeriveForTrashAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+
     public class WebhookController : ControllerBase
     {
         private readonly List<string> _jsons;
@@ -22,10 +24,15 @@ namespace WebSeriveForTrashAPI.Controllers
         public IActionResult PostSavePage([FromBody] dynamic testObject)
         {
             _jsons.Add(JsonConvert.SerializeObject(testObject));
-
-            return Ok();
+            _jsons.Add(Request.Headers["X-Hub-Signature-256"]);
+            if (Request.Headers["X-Hub-Signature-256"] ==
+                Encoding.UTF8.GetString(SHA256.HashData(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("SecretForGithub")))))
+                return Ok();
+            else
+                return Accepted();
         }
 
+        [Authorize]
         [HttpGet]
         public IActionResult Get()
         {
