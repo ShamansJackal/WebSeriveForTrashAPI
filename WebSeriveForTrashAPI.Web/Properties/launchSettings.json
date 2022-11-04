@@ -19,7 +19,8 @@
         "JwtKey": "ThisismySecretKey",
         "AdminLogin": "Admin",
         "AdminPassword": "Password",
-        "SecretForGithub": "SecretForGithub"
+        "SecretForGithub": "SecretForGithub",
+        "TelegramBotToken": "T"
       },
       "applicationUrl": "https://localhost:7064;http://localhost:5064",
       "dotnetRunMessages": true

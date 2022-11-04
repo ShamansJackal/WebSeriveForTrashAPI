@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using RestSharp;
 using System.Text;
+using WebSeriveForTrashAPI.Service.Telegram;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,13 +13,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = true,
+        ValidateIssuer = Environment.GetEnvironmentVariable("JwtIssuer") != null,
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
         ValidIssuer = Environment.GetEnvironmentVariable("JwtIssuer"),
         ValidAudience = Environment.GetEnvironmentVariable("JwtIssuer"),
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JwtKey")))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+            Environment.GetEnvironmentVariable("JwtKey") ?? throw new Exception("JWT signature key not found")
+        ))
     };
 });
 builder.Services.AddAuthorization();
@@ -28,6 +32,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<List<string>>();
+builder.Services.AddSingleton<RestClient>();
+builder.Services.AddTransient<Messager>();
 
 
 var app = builder.Build();

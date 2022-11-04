@@ -24,7 +24,9 @@ namespace WebSeriveForTrashAPI.Controllers
 
             if (identity == null) return BadRequest(new { errorText = "Invalid username or password." });
 
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JwtKey")));
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                Environment.GetEnvironmentVariable("JwtKey") ?? throw new Exception("JWT signature key not found")
+            ));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
@@ -40,7 +42,10 @@ namespace WebSeriveForTrashAPI.Controllers
 
         private ClaimsIdentity GetIdentity(string username, string password)
         {
-            Person person = new(Environment.GetEnvironmentVariable("AdminLogin"), Environment.GetEnvironmentVariable("AdminPassword"));
+            Person person = new(
+                Environment.GetEnvironmentVariable("AdminLogin"),
+                Environment.GetEnvironmentVariable("AdminPassword")
+            );
             if (person != null)
             {
                 var claims = new List<Claim>
