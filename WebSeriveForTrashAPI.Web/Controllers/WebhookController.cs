@@ -10,7 +10,6 @@ namespace WebSeriveForTrashAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-
     public class WebhookController : ControllerBase
     {
         private readonly List<string> _jsons;
@@ -21,12 +20,22 @@ namespace WebSeriveForTrashAPI.Controllers
         }
 
         [HttpPost]
-        public IActionResult PostSavePage([FromBody] dynamic testObject)
+        public async Task<IActionResult> PostSavePage()
         {
-            _jsons.Add(JsonConvert.SerializeObject(testObject));
+            string json = await new StreamReader(Request.Body).ReadToEndAsync();
+
+            _jsons.Add(json);
             _jsons.Add(Request.Headers["X-Hub-Signature-256"]);
-            if (Request.Headers["X-Hub-Signature-256"] ==
-                Encoding.UTF8.GetString(SHA256.HashData(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("SecretForGithub")))))
+
+            using HMACSHA256 hmac = new(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("SecretForGithub")));
+            var hashOfJson = hmac.ComputeHash(Encoding.UTF8.GetBytes(json));
+
+            StringBuilder builder = new(32);
+            for (int i = 0; i < hashOfJson.Length; i++)
+                builder.Append(hashOfJson[i].ToString("x2"));
+            string sha256string = builder.ToString();
+
+            if (Request.Headers["X-Hub-Signature-256"] == $"sha256={sha256string}")
                 return Ok();
             else
                 return Accepted();
