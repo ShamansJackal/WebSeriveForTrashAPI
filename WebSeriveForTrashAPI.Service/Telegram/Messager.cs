@@ -1,4 +1,6 @@
 ﻿using RestSharp;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using WebSeriveForTrashAPI.Model.Telegram.PayloadsForApi;
 
 namespace WebSeriveForTrashAPI.Service.Telegram
@@ -16,11 +18,40 @@ namespace WebSeriveForTrashAPI.Service.Telegram
 
         public async Task<bool> SendMessage(Message message)
         {
-            RestRequest request = new($"bot{_token}/sendMessage", Method.Post);
-            request.AddBody(message);
+            Uri uri = new($"./bot{_token}/sendMessage", UriKind.Relative);
+            RestRequest request = new(uri, Method.Post){ RequestFormat = DataFormat.Json };
 
-            var result = await _client.ExecuteAsync(request);
-            return result.IsSuccessStatusCode;
+            string json = JsonSerializer.Serialize(message, new JsonSerializerOptions() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull});
+            request.AddJsonBody(json);
+            try
+            {
+                var response = await _client.ExecuteAsync(request);
+                return response.IsSuccessStatusCode;
+            } catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return false;
+            }
+
+        }
+
+        public async Task<bool> SendFile(string userId, string filePath)
+        {
+            Uri uri = new($"./bot{_token}/sendDocument", UriKind.Relative);
+            RestRequest request = new(uri, Method.Post);
+            request.AddFile("document", filePath);
+            request.AddParameter("chat_id", userId);
+
+            try
+            {
+                var response = await _client.ExecuteAsync(request);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return false;
+            }
         }
     }
 }
