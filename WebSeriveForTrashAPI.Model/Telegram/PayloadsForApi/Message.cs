@@ -4,8 +4,8 @@ using WebSeriveForTrashAPI.Model.Telegram.Models;
 namespace WebSeriveForTrashAPI.Model.Telegram.PayloadsForApi
 {
     public record Message(
-        [field: JsonPropertyName("chat_id")] string ChatId,
-        [field: JsonPropertyName("text")] string Text
+        [property: JsonPropertyName("chat_id")] string ChatId,
+        [property: JsonPropertyName("text")] string Text
     )
     {
         [JsonPropertyName("parse_mode")] public string? ParseMode { get; init; }
@@ -15,6 +15,6 @@ namespace WebSeriveForTrashAPI.Model.Telegram.PayloadsForApi
         [JsonPropertyName("protect_content")] public bool? ProtectContent { get; init; }
         [JsonPropertyName("reply_to_message_id")] public int? ReplyToMessageId { get; init; }
         [JsonPropertyName("allow_sending_without_reply")] public bool? AllowSendingWithoutReply { get; init; }
-    //[field: JsonPropertyName("reply_markup")] ReplyMarkup? DisablePreview,
+    //[property: JsonPropertyName("reply_markup")] ReplyMarkup? DisablePreview,
     };
 }

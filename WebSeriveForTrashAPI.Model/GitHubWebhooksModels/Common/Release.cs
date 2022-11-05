@@ -2,24 +2,52 @@
 
 namespace WebSeriveForTrashAPI.Model.GitHubWebhooksModels.Common
 {
-    public record Release(
-        [field: JsonPropertyName("url")] string Url,
-        [field: JsonPropertyName("assets_url")] string AssetsUrl,
-        [field: JsonPropertyName("upload_url")] string UploadUrl,
-        [field: JsonPropertyName("html_url")] string HtmlUrl,
-        [field: JsonPropertyName("id")] int Id,
-        [field: JsonPropertyName("node_id")] string NodeId,
-        [field: JsonPropertyName("tag_name")] string TagName,
-        [field: JsonPropertyName("target_commitish")] string TargetCommitish,
-        [field: JsonPropertyName("name")] object Name,
-        [field: JsonPropertyName("draft")] bool Draft,
-        [field: JsonPropertyName("author")] User Author,
-        [field: JsonPropertyName("prerelease")] bool Prerelease,
-        [field: JsonPropertyName("created_at")] DateTime CreatedAt,
-        [field: JsonPropertyName("published_at")] DateTime PublishedAt,
-        [field: JsonPropertyName("assets")] IReadOnlyList<object> Assets,
-        [field: JsonPropertyName("tarball_url")] string TarballUrl,
-        [field: JsonPropertyName("zipball_url")] string ZipballUrl,
-        [field: JsonPropertyName("body")] object Body
-    );
+    public class Release
+    {
+        [JsonPropertyName("url")]
+        public string Url { get; set; }
+
+        [JsonPropertyName("assets_url")]
+        public string AssetsUrl { get; set; }
+
+        [JsonPropertyName("upload_url")]
+        public string UploadUrl { get; set; }
+
+        [JsonPropertyName("html_url")]
+        public string HtmlUrl { get; set; }
+
+        [JsonPropertyName("tag_name")]
+        public string TagName { get; set; }
+
+        [JsonPropertyName("target_commitish")]
+        public string TargetCommitish { get; set; }
+
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        [JsonPropertyName("draft")]
+        public bool Draft { get; set; }
+
+        [JsonPropertyName("prerelease")]
+        public bool Prerelease { get; set; }
+
+        [JsonPropertyName("created_at")]
+        public DateTime CreatedAt { get; set; }
+
+        [JsonPropertyName("published_at")]
+        public DateTime PublishedAt { get; set; }
+
+        [JsonPropertyName("assets")]
+        public List<Asset> Assets { get; set; }
+
+        [JsonPropertyName("tarball_url")]
+        public string TarballUrl { get; set; }
+
+        [JsonPropertyName("zipball_url")]
+        public string ZipballUrl { get; set; }
+
+        [JsonPropertyName("body")]
+        public string Body { get; set; }
+    }
 }
+
