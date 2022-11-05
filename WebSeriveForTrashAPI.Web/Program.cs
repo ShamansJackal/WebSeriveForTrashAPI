@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using RestSharp;
 using System.Text;
+using WebSeriveForTrashAPI.Service.FileDownloader;
 using WebSeriveForTrashAPI.Service.Telegram;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,9 +32,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton<List<string>>();
-builder.Services.AddSingleton<RestClient>();
+builder.Services.AddSingleton<RestClient>(x => new RestClient(new RestClientOptions("https://api.telegram.org")
+{
+    MaxTimeout = 10000,
+    ThrowOnAnyError = false
+}));
 builder.Services.AddTransient<Messager>();
+builder.Services.AddTransient<FileDownloader>();
 
 
 var app = builder.Build();

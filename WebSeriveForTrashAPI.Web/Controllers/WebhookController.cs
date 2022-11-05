@@ -1,12 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using WebSeriveForTrashAPI.Model.GitHubWebhooksModels;
-using WebSeriveForTrashAPI.Model.Telegram.PayloadsForApi;
+using WebSeriveForTrashAPI.Service.FileDownloader;
 using WebSeriveForTrashAPI.Service.Telegram;
 using WebSeriveForTrashAPI.Service.Utils;
 
@@ -16,53 +13,46 @@ namespace WebSeriveForTrashAPI.Controllers
     [ApiController]
     public class WebhookController : ControllerBase
     {
-        private readonly List<string> _jsons;
         private readonly Messager _messager;
+        private readonly FileDownloader _downloader;
+        private readonly IConfiguration _configuration;
 
-        public WebhookController(List<string> jsons, Messager messager)
+        public WebhookController(Messager messager, FileDownloader fileDownloader, IConfiguration configuration)
         {
-            _jsons = jsons;
             _messager = messager;
+            _downloader = fileDownloader;
+            _configuration = configuration;
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostSavePage()
+        public async Task<IActionResult> PostSavePage(ReleaseWebhookPayload release)
         {
             var json = await Request.Body.ReadFullyAsync();
-
-            _jsons.Add(Request.Headers["X-Hub-Signature-256"]);
-
-            StringBuilder builder = new(32);
-            for (int i = 0; i < json.Length; i++)
-                builder.Append(json[i].ToString("x2"));
-            _jsons.Add(builder.ToString());
-
 
             using HMACSHA256 hmac = new(Encoding.UTF8.GetBytes(
                 Environment.GetEnvironmentVariable("SecretForGithub") ?? throw new Exception("Secret for github signature check not found")
             ));
             var hashOfJson = hmac.ComputeHash(json);
 
-            builder = new(32);
+            StringBuilder builder = new(32);
             for (int i = 0; i < hashOfJson.Length; i++)
                 builder.Append(hashOfJson[i].ToString("x2"));
             string sha256string = builder.ToString();
 
             if (Request.Headers["X-Hub-Signature-256"] == $"sha256={sha256string}")
             {
-                await _messager.SendMessage(new("210583358", "dsa"));
+                if (release.Action != "released") return Ok();
+
+                await _messager.SendMessage(new(_configuration["UserId"], release.Release.HtmlUrl));
+                foreach (var asset in release.Release.Assets)
+                    _downloader.SendFileToUser(asset.BrowserDownloadUrl, _configuration["UserId"]);
+
                 return Ok();
             }
-
             else
-                return Accepted();
-        }
-
-        [Authorize]
-        [HttpGet]
-        public IActionResult Get()
-        {
-            return Ok(_jsons);
+            {
+                return BadRequest("Incorrect signature");
+            }
         }
     }
 }
