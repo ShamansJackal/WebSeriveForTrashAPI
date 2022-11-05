@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using WebSeriveForTrashAPI.Model.GitHubWebhooksModels;
 using WebSeriveForTrashAPI.Service.FileDownloader;
 using WebSeriveForTrashAPI.Service.Telegram;
@@ -25,7 +26,7 @@ namespace WebSeriveForTrashAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostSavePage(ReleaseWebhookPayload release)
+        public async Task<IActionResult> PostSavePage()
         {
             var json = await Request.Body.ReadFullyAsync();
 
@@ -39,8 +40,10 @@ namespace WebSeriveForTrashAPI.Controllers
                 builder.Append(hashOfJson[i].ToString("x2"));
             string sha256string = builder.ToString();
 
-            if (Request.Headers["X-Hub-Signature-256"] == $"sha256={sha256string}")
+            if (Request.Headers["X-Hub-Signature-256"] != $"sha256={sha256string}")
             {
+                ReleaseWebhookPayload release = JsonSerializer.Deserialize<ReleaseWebhookPayload>(json);
+
                 if (release.Action != "released") return Ok();
 
                 await _messager.SendMessage(new(_configuration["UserId"], release.Release.HtmlUrl));
