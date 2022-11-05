@@ -40,7 +40,7 @@ namespace WebSeriveForTrashAPI.Controllers
                 builder.Append(hashOfJson[i].ToString("x2"));
             string sha256string = builder.ToString();
 
-            if (Request.Headers["X-Hub-Signature-256"] != $"sha256={sha256string}")
+            if (Request.Headers["X-Hub-Signature-256"] == $"sha256={sha256string}")
             {
                 ReleaseWebhookPayload release = JsonSerializer.Deserialize<ReleaseWebhookPayload>(json);
 
